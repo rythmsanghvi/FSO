@@ -1,1 +1,1 @@
-### Submission for anecdote excercise
+### Submission for anecdote exercise

@@ -1,1 +1,1 @@
-### Submission for courseinfo excercise
+### Submission for courseinfo exercise
