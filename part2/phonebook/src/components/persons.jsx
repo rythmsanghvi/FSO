@@ -1,4 +1,4 @@
-const Persons = ({ persons, filter }) => {
+const Persons = ({ persons, filter, removePerson }) => {
   const filteredPersons = !filter
     ? persons
     : persons.filter((person) =>
@@ -10,6 +10,7 @@ const Persons = ({ persons, filter }) => {
         return (
           <p key={person.id}>
             {person.name} {person.number}
+            <button onClick={() => removePerson(person.id)}>delete</button>
           </p>
         )
       })}
