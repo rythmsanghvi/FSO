@@ -6,6 +6,16 @@ const app = express()
 
 const Person = module.require("./models/people")
 
+const errorHandler = (error, request, response, next) => {
+  console.log(error.message)
+
+  if (error.name === "CastError") {
+    response.status(400).send({ error: "malformed id" })
+  }
+
+  next(error)
+}
+
 app.use(express.static("dist"))
 app.use(express.json())
 app.use(
@@ -40,20 +50,27 @@ app.get("/info", (request, response) => {
   })
 })
 
-app.get("/api/persons/:id", (request, response) => {
+app.get("/api/persons/:id", (request, response, next) => {
   const id = request.params.id
-  const person = persons.find((person) => person.id === id)
-  if (person) {
-    response.json(person)
-  } else {
-    response.status(404).end()
-  }
+  Person.findById(request.params.id)
+    .then((person) => {
+      if (person) {
+        response.status(200).send(person)
+      } else {
+        response.status(404).end()
+      }
+    })
+    .catch((error) => next(error))
 })
 
-app.delete("/api/persons/:id", (request, response) => {
-  const id = request.params.id
-  persons = persons.filter((person) => person.id !== id)
-  response.status(204).end()
+app.delete("/api/persons/:id", (request, response, next) => {
+  Person.findByIdAndDelete(request.params.id)
+    .then((result) => {
+      response.status(204).end()
+    })
+    .catch((error) => {
+      next(error)
+    })
 })
 
 app.post("/api/persons", (request, response) => {
@@ -66,15 +83,6 @@ app.post("/api/persons", (request, response) => {
     return response.status(400).json({ error: "Missing number" })
   }
 
-  // if (
-  //   persons.find(
-  //     (person) =>
-  //       person.name.trim().toLowerCase() === body.name.trim().toLowerCase(),
-  //   )
-  // ) {
-  //   return response.status(400).json({ error: "name must be unique" })
-  // }
-
   const person = new Person({ name: body.name, number: body.number })
 
   person.save().then((person) => {
@@ -83,6 +91,27 @@ app.post("/api/persons", (request, response) => {
 
   response.json(person)
 })
+
+app.put("api/persons/:id", (request, response, next) => {
+  const { name, number } = request.body
+
+  Person.findById(request.params.id)
+    .then((person) => {
+      if (!person) {
+        return response.status(404).end()
+      }
+
+      person.name = name
+      person.number = number
+
+      return person.save().then((updatedPerson) => {
+        response.json(updatedPerson)
+      })
+    })
+    .catch((error) => next(error))
+})
+
+app.use(errorHandler)
 
 const PORT = process.env.PORT
 app.listen(PORT, () => {
