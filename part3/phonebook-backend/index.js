@@ -11,6 +11,8 @@ const errorHandler = (error, request, response, next) => {
 
   if (error.name === "CastError") {
     response.status(400).send({ error: "malformed id" })
+  } else if (error.name === "ValidationError") {
+    response.status(400).send({ error: error.message })
   }
 
   next(error)
@@ -73,7 +75,7 @@ app.delete("/api/persons/:id", (request, response, next) => {
     })
 })
 
-app.post("/api/persons", (request, response) => {
+app.post("/api/persons", (request, response, next) => {
   const body = request.body
   if (!body.name) {
     return response.status(400).json({ error: "Missing name" })
@@ -85,11 +87,13 @@ app.post("/api/persons", (request, response) => {
 
   const person = new Person({ name: body.name, number: body.number })
 
-  person.save().then((person) => {
-    console.log(`${person.name} saved to phonebook`)
-  })
-
-  response.json(person)
+  person
+    .save()
+    .then((person) => {
+      console.log(`${person.name} saved to phonebook`)
+      response.status(201).json(person)
+    })
+    .catch((error) => next(error))
 })
 
 app.put("api/persons/:id", (request, response, next) => {

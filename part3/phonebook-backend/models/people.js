@@ -4,7 +4,7 @@ mongoose.set("strictQuery", false)
 
 const url = process.env.MONGODB_URI
 
-console.log("connecting to ", url)
+console.log("connecting to DB")
 
 mongoose
   .connect(url, { family: 4 })
@@ -16,8 +16,17 @@ mongoose
   })
 
 const phonebookSchema = new mongoose.Schema({
-  name: String,
-  number: String,
+  name: { type: String, minLength: 3, required: true },
+  number: {
+    type: String,
+    minlength: 8,
+    validate: {
+      validator: (v) => {
+        return /^\d{2,3}-\d+$/.test(v)
+      },
+      message: (props) => `${props.value} invalid phone nuumber`,
+    },
+  },
 })
 
 phonebookSchema.set("toJSON", {
