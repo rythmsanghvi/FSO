@@ -2,7 +2,6 @@ import { useState, useEffect } from "react"
 import Persons from "./components/persons"
 import Filter from "./components/filter"
 import PersonForm from "./components/personform"
-import axios from "axios"
 import numberService from "./services/numbers"
 import Notification from "./components/notification"
 
@@ -74,13 +73,24 @@ const App = () => {
       const personObj = {
         name: newPerson.name,
         number: newPerson.number,
-        id: allPersons.length + 1,
       }
-      numberService.create(personObj).then((createdPerson) => {
-        setAllPersons(allPersons.concat(createdPerson))
-        setNewPerson({ name: "", number: "" })
-        setMessage({ type: "success", message: `Added ${createdPerson.name}` })
-      })
+      numberService
+        .create(personObj)
+        .then((createdPerson) => {
+          setAllPersons(allPersons.concat(createdPerson))
+          setNewPerson({ name: "", number: "" })
+          setMessage({
+            type: "success",
+            message: `Added ${createdPerson.name}`,
+          })
+        })
+        .catch((error) => {
+          console.log(error.response.data.error)
+          setMessage({
+            type: "error",
+            message: error.response?.data?.error || "Failed to add person",
+          })
+        })
     }
   }
 
