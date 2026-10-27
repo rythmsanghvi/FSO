@@ -1,18 +1,18 @@
-const mongoose = require("mongoose")
+const mongoose = require('mongoose')
 
-mongoose.set("strictQuery", false)
+mongoose.set('strictQuery', false)
 
 const url = process.env.MONGODB_URI
 
-console.log("connecting to DB")
+console.log('connecting to DB')
 
 mongoose
   .connect(url, { family: 4 })
-  .then((result) => {
-    console.log("connected to DB")
+  .then(() => {
+    console.log('connected to DB')
   })
   .catch((error) => {
-    console.log("error connecting to DB:", error.message)
+    console.log('error connecting to DB:', error.message)
   })
 
 const phonebookSchema = new mongoose.Schema({
@@ -29,7 +29,7 @@ const phonebookSchema = new mongoose.Schema({
   },
 })
 
-phonebookSchema.set("toJSON", {
+phonebookSchema.set('toJSON', {
   transform: (document, returnedObject) => {
     returnedObject.id = returnedObject._id.toString()
     delete returnedObject._id
@@ -37,4 +37,4 @@ phonebookSchema.set("toJSON", {
   },
 })
 
-module.exports = mongoose.model("Person", phonebookSchema)
+module.exports = mongoose.model('Person', phonebookSchema)
